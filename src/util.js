@@ -1,55 +1,42 @@
 import React from "react";
-import numeral from "numeral";
-import {Circle,Popup} from 'react-leaflet';
+import { Popup, Marker } from 'react-leaflet';
+import L from 'leaflet';
 
-// Color Based on Case Type
-const casesTypeColors={
-    cases:{
-        hex:"#CC1034",
-        multiplier:800,
-    },
-    recovered:{
-        hex:"#7dd71d",
-        multiplier:1200
-    },
-    deaths:{
-        hex:"#fb4143",
-        multiplier:2000,
-    },
-};
+const ShowDataOnMap = ({userInfo, onMarkerClick}) => {
 
-export const sortData=(data)=>{
-    const sortedData=[...data];
-    return sortedData.sort((a,b)=>a.cases>b.cases?-1:1);
-    
+    return (
+        <>{userInfo &&
+
+            <Marker
+                onClick={()=>onMarkerClick(true)}
+                icon={new L.Icon({
+                    iconUrl: userInfo.picture.thumbnail,
+                    iconRetinaUrl: userInfo.picture.thumbnail,
+                    shadowUrl: null,
+                    shadowSize: null,
+                    shadowAnchor: null,
+                    iconSize: new L.Point(30, 30),
+                    className: 'leaflet-div-icon',
+                    iconAnchor: new L.Point(0, 0),
+
+                })}
+
+                position={[userInfo.location.coordinates.latitude, userInfo.location.coordinates.longitude]}
+            >
+
+                <Popup>
+                    <div className="info-container">
+                        <div className="info-profile" style={{ backgroundImage: `url(${userInfo.picture.thumbnail})` }} />
+                        <div className="info-name">{userInfo.name.title + " " + userInfo.name.first + " " + userInfo.name.last}</div>
+                        <div className="info-data">Email: {userInfo.email}</div>
+                        <div className="info-data">Country: {userInfo.location.country + ", " + userInfo.location.state}</div>
+                        <div className="info-data">Age: {userInfo.dob.age}</div>
+                    </div>
+                </Popup>
+            </Marker>
+
+        }</>
+    )
+
 }
-
-export const prettyPrintStat=(stat)=>
-    stat ? `+${numeral(stat).format("0.0a")}` : "+0";
-
-
-// DRAW circles on the map with interactive tooltip
-export const showDataOnMap=(data1,casesType="cases")=>
-
-        data1.map((country)=>(
-        <Circle
-            center={[country.countryInfo.lat,country.countryInfo.long]}
-            fillOpacity={0.4}
-            color={casesTypeColors[casesType].hex}
-            fillColor={casesTypeColors[casesType].hex}
-            radius={
-                Math.sqrt(country[casesType])*casesTypeColors[casesType].multiplier
-            }
-        >
-        <Popup>
-            <div className="info-container">
-                <div className="info-flag" style={{backgroundImage:`url(${country.countryInfo.flag})`}}/>
-                <div className="info-name">{country.country}</div>
-                <div className="info-confirmed">Cases: {numeral(country.cases).format("0.0")}</div>
-                <div className="info-recovered">Recovered: {numeral(country.recovered).format("0.0")}</div>
-                <div className="info-deaths">Deaths: {numeral(country.deaths).format("0.0")}</div>
-            </div>
-        </Popup>
-        </Circle>
-    ));
-
+export default ShowDataOnMap;
